@@ -1,103 +1,42 @@
+# Assignment 3 report
 
-[Github Repository](https://github.com/tadashi-dev-eng/TashiPenjor_02230306_DSO101_A1)
+## Repository
 
-# Assignment 1 report
+- GitHub repository contains:
+  - `backend/Dockerfile`
+  - `frontend/Dockerfile`
+  - `.github/workflows/deploy.yml`
 
-This report is the steps taken to build and improve the frontend + backend todo app, including how the UI was enhanced and how the Docker build was fixed. Screenshots are referenced as placeholders (add your own images in the repo and replace the placeholders).
+## Steps taken
 
----
+1. Verified backend and frontend Dockerfiles.
+2. Created GitHub Actions workflow to build and push Docker image to DockerHub.
+3. Added `.env` to `.gitignore` to keep credentials out of source control.
+4. Configured Render deployment to deploy from existing Docker image.
 
-## 1. Implement full CRUD UI (React)
+## Challenges faced
 
-### Steps taken
-1. Added frontend logic in `src/App.js` to:
-   - Fetch todos (`GET /todos`)
-   - Create todo (`POST /todos`)
-   - Update todo text + mark done (`PUT /todos/:id`)
-   - Delete todo (`DELETE /todos/:id`)
-2. Updated code to match backend endpoints in `backend/server.js`.
-3. Ensured API URL is read from `REACT_APP_API_URL` environment variable.
+- Render free plan may not support deploy webhooks directly.
+- Ensuring secrets are not hardcoded in repo files.
+- Aligning workflow with Render image deployment requirements.
 
----
+## Learning outcomes
 
-## 2. Implement full CRUD UI (React)
+- Learned how to containerize a Node.js backend and React frontend.
+- Learned how to use GitHub Actions for Docker build and push.
+- Learned how to securely use GitHub Secrets for DockerHub and Render credentials.
 
-### Steps taken
-1. Added frontend logic in `src/App.js` to:
-   - Fetch todos (`GET /todos`)
-   - Create todo (`POST /todos`)
-   - Update todo text + mark done (`PUT /todos/:id`)
-   - Delete todo (`DELETE /todos/:id`)
-2. Updated code to match backend endpoints in `backend/server.js`.
-3. Ensured API URL is read from `REACT_APP_API_URL` environment variable.
+## Screenshots
 
----
+- Successful GitHub Actions workflow: `screenshots/workflow-success.png`
+- DockerHub pushed image: `screenshots/dockerhub-image.png`
+- Render deployment: `screenshots/render-deploy.png`
 
-## 3. Docker build 
+## Render deployment instance
 
-### Steps taken in frontend
-1. Run `sudo docker build --build-arg REACT_APP_API_URL=... -t ... .`
-2. Build failed with error:
-   - `COPY nginx.conf ... : "/nginx.conf": not found`
-3. Created `nginx.conf` in `frontend/` next to `Dockerfile`.
-4. Rebuilt successfully.
+- Render URL: `https://<your-render-service>.onrender.com`
 
-![alt text](Assignment_1/Assets/dockerfe.png) 
-### Outcome
-- Docker image builds successfully and pushed to docker hub
-- Frontend served by nginx.
+## Notes
 
-![alt text](Assignment_1/Assets/pushedfe.png)
- 
----
-
-### Backend steps taken in backend
-
-1. Set up Express + CORS + JSON body parsing.
-2. Loaded DB config from .env and created a pg Pool.
-3. Initialized DB on start: CREATE TABLE IF NOT EXISTS todos (...).
-4. Implemented CRUD endpoints:
-
-![alt text](Assignment_1/Assets/dockerbe.png)
-
-### Outcome
-- Docker image builds successfully and pushed to docker hub
-
-![alt text](Assignment_1/Assets/pushedbe.png)
-
----
-
-### Image in docker hub
-
-![alt text](Assignment_1/Assets/hub.png)
-
-
-### Deployment in render
-
-After pushing the image in docker hub, I have deployed the image in render to go live. 
-
-#### live backend
-
-![alt text](Assignment_1/Assets/livebe.png)
-
-![alt text](Assignment_1/Assets/belive.png)
-
-#### live frontend
-
-![alt text](Assignment_1/Assets/livefe.png)
-
-![alt text](Assignment_1/Assets/felive.png)
-
----
-
-### Automated image build and deployment
-
-Since the render Blueprint is paid version. I used the Github Action to automate the image build and deployment. 
-
-![alt text](Assignment_1/Assets/cicd.png)
-
-### Updated image
-
-![alt text](Assignment_1/Assets/image.png)
-
----# assignment3-node-app
+- Do not hardcode credentials in code or repo files.
+- Use GitHub repository secrets: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`, `RENDER_WEBHOOK`.
