@@ -38,13 +38,13 @@ jobs:
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.baluthegoat }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and Push Docker Image
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/dso-as3-backend:latest ./backend
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/dso-as3-backend:latest
+          docker build -t ${{ secrets.baluthegoat }}/dso-as3-backend:latest ./backend
+          docker push ${{ secrets.baluthegoat }}/dso-as3-backend:latest
 
       - name: Deploy to Render
         run: |
