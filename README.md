@@ -1,42 +1,104 @@
-# Assignment 3 report
+# Assignment 3 Report
 
-## Repository
+## Project Overview
 
-- GitHub repository contains:
-  - `backend/Dockerfile`
-  - `frontend/Dockerfile`
-  - `.github/workflows/deploy.yml`
+This repository contains a Node.js to-do application with:
 
-## Steps taken
+- `backend/` — Express backend and Prisma data layer
+- `frontend/` — React frontend application
+- `backend/Dockerfile` — backend container definition
+- `frontend/Dockerfile` — frontend container definition and test step
+- `.github/workflows/deploy.yml` — GitHub Actions CI/CD pipeline
 
-1. Verified backend and frontend Dockerfiles.
-2. Created GitHub Actions workflow to build and push Docker image to DockerHub.
-3. Added `.env` to `.gitignore` to keep credentials out of source control.
-4. Configured Render deployment to deploy from existing Docker image.
+## Assignment Tasks Completed
 
-## Challenges faced
+### Task 1: Repository setup
 
-- Render free plan may not support deploy webhooks directly.
-- Ensuring secrets are not hardcoded in repo files.
-- Aligning workflow with Render image deployment requirements.
+- Verified `package.json` scripts in both `backend` and `frontend`.
+- Confirmed the repository can be published publicly for DockerHub access.
 
-## Learning outcomes
+### Task 2: Dockerfile verification
 
-- Learned how to containerize a Node.js backend and React frontend.
-- Learned how to use GitHub Actions for Docker build and push.
-- Learned how to securely use GitHub Secrets for DockerHub and Render credentials.
+- `backend/Dockerfile` uses Node.js 20, installs dependencies, runs Prisma push, and starts the API on port `5000`.
+- `frontend/Dockerfile` uses Node.js 20, installs dependencies, runs tests, and starts the app on port `3000`.
+- Tested the backend app locally using Docker build and run.
+
+### Task 3: GitHub Actions workflow
+
+- Added `.github/workflows/deploy.yml` to build and push the Docker image.
+- The workflow logs into DockerHub using secrets, builds the backend image, pushes it, and triggers Render.
+
+### Task 4: Render deployment
+
+- Prepared the app for Render deployment from an existing Docker image.
+- Use the Render service to deploy the image pushed to DockerHub.
+
+## CI/CD Implementation
+
+### GitHub Actions workflow details
+
+- Trigger: `push` to `main`
+- Steps:
+  1. Checkout code
+  2. Set up Docker Buildx
+  3. Login to DockerHub using `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN`
+  4. Build and push `dso-as3-backend:latest` from `./backend`
+  5. Trigger Render deployment via webhook URL in `RENDER_WEBHOOK_URL`
+
+### Required GitHub secrets
+
+- `DOCKERHUB_USERNAME`
+- `DOCKERHUB_TOKEN`
+- `RENDER_WEBHOOK_URL`
+
+> Important: Do not hardcode credentials in repository files.
+
+## Local testing
+
+### Backend
+
+```bash
+cd backend
+npm install
+npm test
+```
+
+### Build backend container locally
+
+```bash
+docker build -t yourdockerhubusername/dso-as3-backend:latest ./backend
+```
+
+### Run backend container locally
+
+```bash
+docker run -p 5000:5000 yourdockerhubusername/dso-as3-backend:latest
+```
+
+## Render deployment
+
+1. Create a new Render service.
+2. Choose `Deploy from existing image`.
+3. Specify the DockerHub image: `yourdockerhubusername/dso-as3-backend:latest`.
+4. Configure the Render webhook and save it as a GitHub secret in the repository.
 
 ## Screenshots
 
-- Successful GitHub Actions workflow: `screenshots/workflow-success.png`
-- DockerHub pushed image: `screenshots/dockerhub-image.png`
-- Render deployment: `screenshots/render-deploy.png`
+Save the following process screenshots in `screenshots/`:
+- `screenshots/workflow-success.png` — GitHub Actions workflow success
+- `screenshots/dockerhub-image.png` — DockerHub image pushed successfully
+- `screenshots/render-deploy.png` — Render deployment success
 
-## Render deployment instance
+## Deployment link
 
 - Render URL: `https://<your-render-service>.onrender.com`
 
-## Notes
+## Challenges faced
+- Ensuring the workflow builds the correct backend image path from `./backend`.
+- Keeping DockerHub and Render credentials out of source control.
+- Aligning the GitHub Actions deploy step with Render webhook requirements.
 
-- Do not hardcode credentials in code or repo files.
-- Use GitHub repository secrets: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`, `RENDER_WEBHOOK`.
+## Learning outcomes
+- Learned how to containerize a Node.js app and configure Dockerfiles.
+- Learned to automate DockerHub pushes with GitHub Actions.
+- Learned how to trigger Render deployments from a CI workflow.

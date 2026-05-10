@@ -96,64 +96,78 @@
 
 // });
 
-jest.mock('pg', () => {
-  const mockPool = { query: jest.fn() };
-  return { Pool: jest.fn(() => mockPool) };
-});
+jest.mock('@prisma/adapter-better-sqlite3', () => ({
+  PrismaBetterSqlite3: jest.fn(() => ({ url: process.env.DATABASE_URL || 'file:./dev.db' }))
+}))
 
-const request = require('supertest');
-const { Pool } = require('pg');
-const app = require('../server');
-const mockPool = new Pool();
+const mockTodo = {
+  findMany: jest.fn(),
+  create: jest.fn(),
+  update: jest.fn(),
+  delete: jest.fn(),
+}
+
+jest.mock('@prisma/client', () => ({
+  PrismaClient: jest.fn(() => ({ todo: mockTodo }))
+}))
+
+const request = require('supertest')
+const app = require('../server')
 
 beforeEach(() => {
-  mockPool.query.mockReset();
-});
+  jest.clearAllMocks()
+})
 
 describe('Todo API Tests', () => {
-
   test('GET /todos - should return all todos', async () => {
-    mockPool.query.mockResolvedValueOnce({
-      rows: [{ id: 1, task: 'Buy groceries', done: false }]
-    });
-    const res = await request(app).get('/todos');
-    expect(res.statusCode).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-  });
+    mockTodo.findMany.mockResolvedValueOnce([
+      { id: 1, task: 'Buy groceries', done: false }
+    ])
+
+    const res = await request(app).get('/todos')
+
+    expect(res.statusCode).toBe(200)
+    expect(Array.isArray(res.body)).toBe(true)
+    expect(res.body).toEqual([
+      { id: 1, task: 'Buy groceries', done: false }
+    ])
+  })
 
   test('POST /todos - should create a new todo', async () => {
-    mockPool.query.mockResolvedValueOnce({
-      rows: [{ id: 1, task: 'New task', done: false }]
-    });
+    mockTodo.create.mockResolvedValueOnce({ id: 1, task: 'New task', done: false })
+
     const res = await request(app)
       .post('/todos')
-      .send({ task: 'New task' });
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toHaveProperty('task', 'New task');
-  });
+      .send({ task: 'New task' })
+
+    expect(res.statusCode).toBe(200)
+    expect(res.body).toHaveProperty('task', 'New task')
+  })
 
   test('POST /todos - should return 400 if task missing', async () => {
-    const res = await request(app).post('/todos').send({});
-    expect(res.statusCode).toBe(400);
-    expect(res.body).toHaveProperty('error', 'Task is required');
-  });
+    const res = await request(app).post('/todos').send({})
+
+    expect(res.statusCode).toBe(400)
+    expect(res.body).toHaveProperty('error', 'Task is required')
+  })
 
   test('PUT /todos/:id - should update a todo', async () => {
-    mockPool.query.mockResolvedValueOnce({
-      rows: [{ id: 1, task: 'Updated', done: true }]
-    });
+    mockTodo.update.mockResolvedValueOnce({ id: 1, task: 'Updated', done: true })
+
     const res = await request(app)
       .put('/todos/1')
-      .send({ task: 'Updated', done: true });
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toHaveProperty('task', 'Updated');
-  });
+      .send({ task: 'Updated', done: true })
+
+    expect(res.statusCode).toBe(200)
+    expect(res.body).toHaveProperty('task', 'Updated')
+  })
 
   test('DELETE /todos/:id - should delete a todo', async () => {
-    mockPool.query.mockResolvedValueOnce({ rows: [] });
-    const res = await request(app).delete('/todos/1');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toHaveProperty('message', 'Deleted successfully');
-  });
+    mockTodo.delete.mockResolvedValueOnce({ id: 1, task: 'Deleted task', done: true })
 
-});
+    const res = await request(app).delete('/todos/1')
+
+    expect(res.statusCode).toBe(200)
+    expect(res.body).toHaveProperty('message', 'Deleted')
+  })
+})
