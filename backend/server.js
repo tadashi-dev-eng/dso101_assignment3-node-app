@@ -111,7 +111,7 @@ app.use(express.json())
 
 // Root route for service status
 app.get('/', (req, res) => {
-  res.send('Backend is running. Use /todos for API access.')
+  res.send('Backend is running.')
 })
 
 // Health check route
