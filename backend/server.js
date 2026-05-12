@@ -109,6 +109,16 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
+// Root route for service status
+app.get('/', (req, res) => {
+  res.send('Backend is running. Use /todos for API access.')
+})
+
+// Health check route
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok' })
+})
+
 // GET all todos
 app.get('/todos', async (req, res) => {
   const todos = await prisma.todo.findMany()
