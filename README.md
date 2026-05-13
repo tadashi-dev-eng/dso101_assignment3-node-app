@@ -1,83 +1,105 @@
-# Assignment III Report
+# Assignment 3 Report
 
-## Task 1: Repository Setup
+### Backend
 
-**Process:**
+- Node.js with Express
+- Prisma ORM
+- SQLite via `@prisma/adapter-better-sqlite3`
+- CORS support for cross-origin requests
+- Environment configuration with `dotenv`
+- Containerized using `backend/Dockerfile`
 
-- Verified the repository contains `backend/`, `frontend/`, and `.github/workflows/`.
-- Confirmed `backend/package.json` and `frontend/package.json` include relevant scripts.
-- Confirmed the repository is ready for public submission and CI/CD automation.
+### Frontend
 
-**Screenshot Upload:**
+- React with Create React App
+- React Router not used in current implementation
+- Frontend package managed with npm
+- Containerized using `frontend/Dockerfile`
 
-- `screenshots/task1-repo-setup.png`
+### CI/CD and Deployment
 
-## Task 2: Dockerfile Verification
+- GitHub Actions workflow at `.github/workflows/deploy.yml`
+- Docker image build and push to DockerHub
+- Deployment trigger via Render webhook
 
-### Backend Dockerfile
+---
 
-**Process:**
+## Backend Implementation
 
-- Reviewed `backend/Dockerfile` for correct base image and build steps.
-- Ensured the file installs dependencies, generates Prisma client, and exposes port `5000`.
-- Verified the startup command runs the server using `node server.js`.
+### `backend/server.js`
 
-**Screenshot Upload:**
+The backend exposes the following endpoints:
 
-- `screenshots/task2-backend-dockerfile.png`
+- `GET /` — root route to verify the backend is running
+- `GET /health` — health check endpoint
+- `GET /todos` — fetch all todo items
+- `POST /todos` — create a new todo item
+- `PUT /todos/:id` — update an existing todo item
+- `DELETE /todos/:id` — delete a todo item
 
-### Frontend Dockerfile
+### Database
 
-**Process:**
+- Uses Prisma Client for database access
+- Configured to use a local SQLite database by default
+- Connection string is read from `process.env.DATABASE_URL`, with fallback to `file:./dev.db`
 
-- Reviewed `frontend/Dockerfile` to confirm containerization of the React app.
-- Verified it uses `node:20-alpine`, installs dependencies, runs tests, and starts on port `3000`.
-- Confirmed the app can run in a container using `npm start`.
+### Docker configuration
 
-**Screenshot Upload:**
+- `backend/Dockerfile` uses Node 20 slim
+- Installs dependencies and generates Prisma client
+- Exposes port `5000`
+- Runs `npx prisma db push` before starting the server
 
-- `screenshots/task2-frontend-dockerfile.png`
+---
 
-## Task 3: GitHub Actions Workflow
+## Frontend Implementation
 
-**Process:**
+### `frontend/package.json`
 
-- Created `.github/workflows/deploy.yml` to automate build, push, and deployment.
-- Configured workflow to run on `push` to `main`.
-- Added steps to checkout repo, install Node.js, install backend dependencies, generate Prisma client, and run tests.
-- Added Docker Buildx setup, DockerHub login, image build and push, and Render webhook trigger.
+- Uses React 19 and React Scripts 5
+- Scripts:
+  - `npm start`
+  - `npm build`
+  - `npm test`
 
-### Required Secrets
+### Docker configuration
+
+- `frontend/Dockerfile` builds the React app inside Node 20 Alpine
+- Installs dependencies and runs tests
+- Exposes port `3000`
+- Starts the app with `npm start`
+
+---
+
+## CI/CD Pipeline
+
+### Workflow steps
+
+The GitHub Actions workflow performs the following actions on push to `main`:
+
+1. Checkout repository
+2. Set up Node.js 20
+3. Install backend dependencies
+4. Generate Prisma client
+5. Run backend tests
+6. Set up Docker Buildx
+7. Log in to DockerHub using secrets
+8. Build and push backend Docker image
+9. Trigger Render deployment via webhook
+
+### Required secrets for the assignment are : 
 
 - `DOCKERHUB_USERNAME`
 - `DOCKERHUB_TOKEN`
 - `RENDER_WEBHOOK_URL`
 
-**Screenshot Upload:**
+![alt text](Assets/credentials.png)
 
-- `screenshots/task3-workflow.png`
+---
 
-## Task 4: Render Deployment
-
-**Process:**
-
-- Created a Render service using the DockerHub image from the CI pipeline.
-- Chose deployment from an existing image and configured container settings.
-- Ensured the GitHub Actions webhook triggers Render to deploy the newly pushed image.
-- Verified the deployed service responds correctly.
-
-**Screenshot Upload:**
-
-- `screenshots/task4-render-deploy.png`
-
-## Local Testing
+## Local Setup and Testing
 
 ### Backend
-
-**Process:**
-
-- Installed backend dependencies, ran tests, and started the app locally.
-- Verified the backend responds on the expected port.
 
 ```bash
 cd backend
@@ -85,97 +107,74 @@ npm install
 npm test
 npm start
 ```
+- Running the backend on port 5000
 
-**Screenshot Upload:**
+![alt text](Assets/backend-local-test.png)
 
-- `screenshots/task5-backend-test.png`
+- When testing the backend it passed all the 5 test that has the CURD operations. 
+  
+![alt text](Assets/backend-test.png)
 
-### Frontend
-
-**Process:**
-
-- Installed frontend dependencies and started the React app locally.
-- Verified the frontend runs successfully and connects to the backend API.
+### 8.2 Frontend
 
 ```bash
 cd frontend
 npm install
 npm start
 ```
+- Running the frontend on port 3000
+![alt text](Assets/frontend-local-test.png)
 
-**Screenshot Upload:**
+- When testing the frontend it passed all the test.
 
-- `screenshots/task5-frontend-test.png`
+![alt text](Assets/frontend-test.png)
 
-### Docker commands
-
-**Process:**
-
-- Built the backend container locally.
-- Ran the container and confirmed the service was accessible at port `5000`.
+### Docker
+- In this process I have created the docker image and tested locally by exposing the port 5000 before pushing it to the docker hub for deployment. 
 
 ```bash
-docker build -t yourdockerhubusername/dso-as3-backend:latest ./backend
-docker run -p 5000:5000 yourdockerhubusername/dso-as3-backend:latest
+docker build -t baluthegoat/dso-as3-backend:latest .
+```
+![alt text](Assets/backend-image-new.png)
+
+```bash
+docker run -p 5000:5000 baluthegoat/dso-as3-backend:latest
 ```
 
-**Screenshot Upload:**
+![alt text](Assets/backend-local-test.png)
+---
 
-- `screenshots/task5-docker-run.png`
+## 
 
-## Deployment Details
 
-### DockerHub
 
-**Process:**
+## CI/CD and Deployment
+- The Github actions pipeline passed successfully on main.
 
-- Pushed the backend image to DockerHub.
-- Used the public repository for easier Render deployment.
+![alt text](Assets/cicd.png)
 
-- Backend image tag used: `yourdockerhubusername/dso-as3-backend:latest`
+- Build the backend image and push to DockerHub
 
-**Screenshot Upload:**
+![alt text](Assets/docker-push.png)
 
-- `screenshots/task6-dockerhub-push.png`
+[Docker image can be access here](https://hub.docker.com/repository/docker/baluthegoat/dso-as3-backend/general)
 
-### Render.com
+### Render
 
-**Process:**
+- Create a Render service from an existing Docker image
+- Use the pushed DockerHub image
+- Configure deployment webhook and store the URL as a GitHub secret
 
-- Configured Render service to deploy from the DockerHub image.
-- Saved the Render webhook URL as a GitHub secret.
-- Confirmed the Render deployment completed successfully.
+![alt text](Assets/service-up.png)
 
-**Screenshot Upload:**
+![alt text](Assets/live.png)
 
-- `screenshots/task6-render-deploy.png`
+[Live URL can be assess here](https://dso-as3-backend.onrender.com)
 
-## Deployment Links
+---
 
-- GitHub repository: `https://github.com/<your-username>/<your-repo>`
-- Render deployment URL: `https://<your-render-service>.onrender.com`
+## Challenges
 
-## Summary of Steps Taken
-
-1. Verified repository structure and package scripts.
-2. Reviewed and validated backend and frontend Dockerfiles.
-3. Built and tested containers locally.
-4. Created GitHub Actions workflow for build, push, and deploy.
-5. Added DockerHub and Render secrets.
-6. Triggered Render deployment via webhook.
-7. Confirmed the backend and frontend services were running successfully.
-
-## Challenges Faced
-
-- Ensuring the workflow used the correct path for backend Docker build.
-- Making sure Prisma client generation ran before tests.
-- Configuring Render webhook to redeploy after Docker image push.
-- Keeping credentials secure and out of source control.
-
-## Learning Outcomes
-
-- Learned how to containerize Node.js and React applications.
-- Learned how to automate DockerHub image build and push with GitHub Actions.
-- Learned how to trigger Render deployment from CI using a webhook.
-- Learned how to configure GitHub secrets for secure deployment.
-- Learned the importance of verifying container build and deployment steps locally.
+- Connecting the backend to a deployable, containerized database layer
+- Ensuring the CI workflow generates Prisma client artifacts before tests
+- Keeping cloud deployment secrets secure and out of source control
